@@ -1,3 +1,7 @@
+//This will display on lcd built in board.
+//There's another version that display via serial monoter
+//@NOTE@ will be in repo soon I guess
+
 #include <pop7.h>
 #include <SoftwareSerial.h>
 #include "HUSKYLENS.h"
