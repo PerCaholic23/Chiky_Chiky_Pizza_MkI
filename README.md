@@ -1,2 +1,7 @@
 # Industrial_object_classification
-idk this is a just a test
+In case if you want to use (lol)
+
+First and foremost
+Install pop7 library
+
+and that's it you can use :)
