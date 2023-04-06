@@ -23,7 +23,7 @@ void setup() {
   Serial.begin(115200);
   mySerial.begin(9600);
   delay(100);
-  Wire.begin();
+  Wire.begin(); //I2c init
   while (!on.begin(Wire)) {
     Serial.println(F("Failed to connect, Green wire >> SCL, Orange wire >> SDA"));
     delay(200);
@@ -45,10 +45,13 @@ void loop() {
   glcd(2, 10, "Pass= %d ", passed_package);
   setTextColor(GLCD_WHITE);
 
-  if (read_ir(A0) <= 12) {
+  while (read_ir(A0) > 12) {
     total_package += 1;
+    motor(1, 50);
   }
-
+  motor(1, 50);
+  delay(250);
+  ao();
   if (on.requestBlocks()) {
     if (on.countBlocks(1) == 1) {
       glcd(5, 0, "Rice detected!     ");
@@ -114,17 +117,32 @@ void printResult(HUSKYLENSResult result) {
   if (percentage > 80) {
     Serial.print("Pass");
     mySerial.write('P');
-    if(sdChk == true){
+    swnd('P');
+    if (sdChk == true) {
       passed_package += 1;
+      //move package into passed storage
+      while (read_ir(A1) > 12) {
+        motor(1, 50);
+      }
       //move package into passed storage
     }
   } else {
     Serial.print("Failed");
-    servo(1, 90);
+    swnd('F');
+    servo(1, 50);
     delay(600);
     mySerial.write('F');
     failed_package += 1;
-    //move this package into failed parcel
+    //move this package into failed storage
+    while (read_ir(A1) > 12) {
+      motor(1, 50);
+    }
+    motor(1, 50);
+    delay(1500);
+    ao();
+    delay(150);
+    servo(1, 0);
+    //move this package into failed storage
   }
 }
 
@@ -144,18 +162,34 @@ void printResultF(HUSKYLENSResult result) {
   glcd(6, 0, "Dimension= %f ", falseDim);
   glcd(7, 0, "Total area= %f% ", falsePercentage);
   if (falsePercentage > 80.00) {
+    swnd('P');
     Serial.print("Pass");
     mySerial.write('P');
-    if(sdChk == true){
+    if (sdChk == true) {
       passed_package += 1;
+      //move package into passed storage
+      while (read_ir(A1) > 12) {
+        motor(1, 50);
+      }
       //move package into passed storage
     }
   } else {
+    swnd('F');
     Serial.print("Failed");
-    servo(1, 90);
+    servo(1, 50);
     delay(600);
     mySerial.write('F');
     failed_package += 1;
+    //move this package into failed storage
+    while (read_ir(A1) > 12) {
+      motor(1, 50);
+    }
+    motor(1, 50);
+    delay(1500);
+    ao();
+    delay(150);
+    servo(1,0);
+    //move this package into failed storage
   }
 }
 
@@ -166,3 +200,25 @@ float read_ir(int pin) { //cm format
     return distance;
   }
 }
+
+void swnd(char mode) {
+  if (mode == 'P') {
+    for (int i = 0; i < 2; i++) {
+      beep();
+      delay(50);
+    }
+  } else {
+    for (int i = 0; i <  3; i++) {
+      beep();
+      delay(250);
+    }
+  }
+}
+
+//Start range = 18
+//Accept range = 30
+//Block size threshold = 150
+
+//servo
+//0 = close
+//50 = open
