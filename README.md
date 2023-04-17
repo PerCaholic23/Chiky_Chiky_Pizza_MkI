@@ -1,4 +1,4 @@
-# Industrial_object_classification
+# Simple_color_recognition
 In case if you want to use (lol)
 
 First and foremost
